@@ -33,114 +33,80 @@
          serialize/1,
          deserialize/1]).
 
--on_load(init/0).
-
 -ifdef(TEST).
+-ifdef(EQC).
+-include_lib("eqc/include/eqc.hrl").
+-define(QC_OUT(P),
+        eqc:on_output(fun(Str, Args) -> io:format(user, Str, Args) end, P)).
+-endif.
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-on_load(init/0).
+
+-define(nif_stub, nif_stub_error(?LINE)).
+nif_stub_error(Line) ->
+    erlang:nif_error({nif_not_loaded,module,?MODULE,line,Line}).
+
 -spec init() -> ok | {error, any()}.
--spec new(integer(), float(), integer()) -> {ok, reference()}.
--spec insert(reference(), binary()) -> ok.
--spec contains(reference(), binary()) -> true | false.
--spec clear(reference()) -> ok.
--spec size(reference()) -> integer().
--spec elements(reference()) -> integer().
--spec effective_fpp(reference()) -> float().
--spec intersect(reference(), reference()) -> ok.
--spec union(reference(), reference()) -> ok.
--spec difference(reference(), reference()) -> ok.
--spec serialize(reference()) -> binary().
--spec deserialize(binary()) -> {ok, reference()}.
-
 init() ->
-    case code:priv_dir(ebloom) of
-        {error, bad_name} ->
-            case code:which(?MODULE) of
-                Filename when is_list(Filename) ->
-                    SoName = filename:join([filename:dirname(Filename),"../priv", "ebloom_nifs"]);
-                _ ->
-                    SoName = filename:join("../priv", "ebloom_nifs")
-            end;
-        Dir ->
-            SoName = filename:join(Dir, "ebloom_nifs")
-    end,
-    erlang:load_nif(SoName, 0).
+    PrivDir = case code:priv_dir(?MODULE) of
+                  {error, bad_name} ->
+                      EbinDir = filename:dirname(code:which(?MODULE)),
+                      AppPath = filename:dirname(EbinDir),
+                      filename:join(AppPath, "priv");
+                  Path ->
+                      Path
+              end,
+    erlang:load_nif(filename:join(PrivDir, atom_to_list(?MODULE)), 0).
 
+-spec new(integer(), float(), integer()) -> {ok, reference()}.
 new(_Count, _FalseProb, _Seed) ->
-    case random:uniform(999999999999) of
-        666 -> {ok, make_ref()};
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec insert(reference(), binary()) -> ok.
 insert(_Ref, _Bin) ->
-    case random:uniform(999999999999) of
-        666 -> ok;
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec contains(reference(), binary()) -> true | false.
 contains(_Ref, _Bin) ->
-    case random:uniform(999999999999) of
-        666 -> true;
-        667 -> false;
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec clear(reference()) -> ok.
 clear(_Ref) ->
-    case random:uniform(999999999999) of
-        666 -> ok;
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec size(reference()) -> integer().
 size(_Ref) ->
-    case random:uniform(999999999999) of
-        666 -> random:uniform(4242);
-        667 -> 0;
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec elements(reference()) -> integer().
 elements(_Ref) ->
-    case random:uniform(999999999999) of
-        666 -> random:uniform(4242);
-        667 -> 0;
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec effective_fpp(reference()) -> float().
 effective_fpp(_Ref) ->
-    case random:uniform(999999999999) of
-        666 -> random:uniform(4242) / 42.42;
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec intersect(reference(), reference()) -> ok.
 intersect(_Ref, _OtherRef) ->
-    case random:uniform(999999999999) of
-        666 -> ok;
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec union(reference(), reference()) -> ok.
 union(_Ref, _OtherRef) ->
-    case random:uniform(999999999999) of
-        666 -> ok;
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec difference(reference(), reference()) -> ok.
 difference(_Ref, _OtherRef) ->
-    case random:uniform(999999999999) of
-        666 -> ok;
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec serialize(reference()) -> binary().
 serialize(_Ref) ->
-    case random:uniform(999999999999) of
-        666 -> list_to_binary(lists:duplicate(random:uniform(255), random:uniform(4242)));
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
+-spec deserialize(binary()) -> {ok, reference()}.
 deserialize(_Bin) ->
-    case random:uniform(999999999999) of
-        666 -> {ok, make_ref()};
-        _   -> exit("NIF library not loaded")
-    end.
+    nif_stub.
 
 %% ===================================================================
 %% EUnit tests
